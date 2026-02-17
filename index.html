@@ -2,55 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Resume Optimizer - Live Status</title>
+    <title>AI Resume Optimizer</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; }
-        #status-box { 
-            padding: 20px; 
-            border: 2px solid #0070f3; 
-            border-radius: 8px; 
-            background-color: #f0f7ff;
-            min-height: 100px;
-        }
-        .status-text { font-weight: bold; color: #0070f3; font-size: 1.2em; }
-        .data-preview { background: #eee; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.9em; }
+        body { font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
+        iframe { width: 100%; height: 600px; border: none; }
+        #status-area { width: 80%; padding: 20px; margin-top: 20px; border: 1px solid #ccc; display: none; }
     </style>
 </head>
 <body>
-    <h1>Resume Optimization Status</h1>
-    <div id="status-box">
-        <p class="status-text" id="status-msg">Initializing connection...</p>
-        <div id="data-container"></div>
+    <h1>Upload Your Resume to Begin</h1>
+    
+    <iframe src="YOUR_N8N_FORM_URL_HERE" id="n8n-form"></iframe>
+
+    <div id="status-area">
+        <h3>Current Status: <span id="status-msg">Processing...</span></h3>
+        <div id="data-preview"></div>
     </div>
 
     <script>
-        async function checkUpdate() {
-            try {
-                // 1. Fetch the latest update from your edited status.js
-                const response = await fetch('/api/status');
-                const result = await response.json();
-
-                // 2. Update the message on the screen
-                const statusMsg = document.getElementById('status-msg');
-                const dataContainer = document.getElementById('data-container');
-
-                statusMsg.innerText = result.status;
-
-                // 3. If there is resume data or a score, show a preview
-                if (result.data) {
-                    dataContainer.innerHTML = `
-                        <p><strong>Latest Update Content:</strong></p>
-                        <pre class="data-preview">${typeof result.data === 'object' ? JSON.stringify(result.data, null, 2) : result.data}</pre>
-                    `;
-                }
-            } catch (error) {
-                console.error("Waiting for n8n to send data...", error);
+        // Polling script stays here to watch for the results 
+        // while the user is interacting with the form above
+        async function checkStatus() {
+            const res = await fetch('/api/status');
+            const result = await res.json();
+            if (result.status !== "Waiting for n8n to start...") {
+                document.getElementById('status-area').style.display = 'block';
+                document.getElementById('status-msg').innerText = result.status;
             }
         }
-
-        // 4. Poll the API every 2 seconds for real-time feel
-        setInterval(checkUpdate, 2000);
+        setInterval(checkStatus, 3000);
     </script>
 </body>
 </html>
